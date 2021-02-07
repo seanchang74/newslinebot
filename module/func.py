@@ -5,12 +5,12 @@ from urllib.parse import urlencode
 from linebot import LineBotApi
 from newslinebot.models import comment
 from linebot.models import TextSendMessage, StickerSendMessage, QuickReply, QuickReplyButton, TemplateSendMessage, URITemplateAction, CarouselTemplate, CarouselColumn, ButtonsTemplate, MessageAction
-admin_uid = "U8795ae526cd325236226d2e4cda3197f"
+
 
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 everything_url = 'https://newsapi.org/v2/everything'
 top_headline_url = 'https://newsapi.org/v2/top-headlines'
-API_KEY = '0d978f7c0a1a479f8fbabe4c4046d12d'
+API_KEY = 'Your_API_Key'
 
 ImageURL = []
 title = []
