@@ -3,7 +3,9 @@ import requests,datetime,time
 from urllib.parse import urlencode
 
 from linebot import LineBotApi
+from newslinebot.models import comment
 from linebot.models import TextSendMessage, StickerSendMessage, QuickReply, QuickReplyButton, TemplateSendMessage, URITemplateAction, CarouselTemplate, CarouselColumn, ButtonsTemplate, MessageAction
+admin_uid = "U8795ae526cd325236226d2e4cda3197f"
 
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 everything_url = 'https://newsapi.org/v2/everything'
@@ -40,6 +42,7 @@ def sendJustSee(event,LINEID):
         description.clear()
         URL.clear()
     line_bot_api.reply_message(event.reply_token,TextSendMessage(text = '擷取新聞資料中...'))
+    time.sleep(3)
     try:
         for result in results:
             if(result['urlToImage'] == None):
@@ -49,7 +52,7 @@ def sendJustSee(event,LINEID):
             title.append(result['title'])
             description.append(result['description'])
             URL.append(result['url'])
-            time.sleep(0.1)
+            break
     except:
         pass
     
@@ -174,6 +177,7 @@ def sendHeadline(event,category,LINEID):
         return
 
     line_bot_api.reply_message(event.reply_token,TextSendMessage(text = '擷取新聞資料中...'))
+    time.sleep(3)
     try:
         for result in results:
             if(result['urlToImage'] == None):
@@ -183,7 +187,7 @@ def sendHeadline(event,category,LINEID):
             title.append(result['title'])
             description.append(result['description'])
             URL.append(result['url'])
-            time.sleep(0.1)
+            break
     except:
         pass
     
@@ -233,6 +237,7 @@ def sendSearch(event,query,LINEID):
         return
         
     line_bot_api.reply_message(event.reply_token,TextSendMessage(text = '擷取新聞資料中...'))
+    time.sleep(3)
     try:
         for result in results:
             if(result['urlToImage'] == None):
@@ -242,7 +247,7 @@ def sendSearch(event,query,LINEID):
             title.append(result['title'])
             description.append(result['description'])
             URL.append(result['url'])
-            time.sleep(0.1)
+            break
     except:
         pass
     
@@ -265,3 +270,37 @@ def sendSearch(event,query,LINEID):
         line_bot_api.push_message(to=LINEID,messages=[message])
     except:
         line_bot_api.push_message(to=LINEID,messages=[TextSendMessage(text = '發生錯誤!')])
+
+def manageform(event,reply,LINEID):
+    try:
+        flist = reply[3:].split('/')
+        cname = flist[0]
+        cemail = flist[1]
+        ccomment = flist[2]
+        
+        unit = comment.objects.create(cuid=LINEID, name=cname, email=cemail, comments=ccomment)
+        unit.save()
+
+        text1 = "姓名:" + cname
+        text1 += "\n電子郵件:" + cemail
+        text1 += "\n評論:" + ccomment
+        
+        message = [
+            TextSendMessage(  
+                    text = "以下是你輸入的資料"
+                ),
+            TextSendMessage(  
+                    text = text1
+                ),
+            TextSendMessage(  
+                    text = "感謝你的寶貴意見，我們會盡快通知客服處理"
+                ),
+            StickerSendMessage(
+                package_id = '2',
+                sticker_id = '41'
+            )
+        ]
+        line_bot_api.reply_message(event.reply_token,message)
+
+    except:
+        line_bot_api.reply_message(event.reply_token,TextSendMessage(text='資料處理發生錯誤！'))

@@ -4,8 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
-from newslinebot.models import users
+from linebot.models import MessageEvent, TextSendMessage
+from newslinebot.models import users, comment
 from module import func
 
 
@@ -18,7 +18,6 @@ def callback(request):
     if request.method == 'POST':
         signature = request.META['HTTP_X_LINE_SIGNATURE']
         body = request.body.decode('utf-8')
-        print(body)
         
         try:
             events = parser.parse(body, signature)
@@ -36,20 +35,23 @@ def callback(request):
                 else:
                     unit = users.objects.get(uid=userid)
                     mode = unit.state
+
                 mtext = event.message.text
-                if mtext[:3] == '###':
-                    func.manageform(event)
+
+                if mtext[:3] == '###' and len(mtext) > 3:
+                    if not comment.objects.filter(cuid=userid).exists():
+                        func.manageform(event,mtext,userid)
+                    else:
+                        line_bot_api.reply_message(event.reply_token,TextSendMessage(text='你已經填寫過表單了，客服將馬上處理你的問題!'))
                 elif mtext == '@隨便看看':
                     func.sendJustSee(event,userid)
                 elif mtext == '@今日頭條':
                     func.sendTopic(event)
-                elif mtext[:3] == '$$$':
-                    func.managesearch(event)
                 elif mtext == '@關鍵字搜索' and mode == 'normal':
                     unit = users.objects.get(uid=userid)
                     unit.state = 'search'
                     unit.save()
-                    line_bot_api.reply_message(event.reply_token,TextSendMessage(text = '請問你想要搜尋什麼呢?\n可以直接用鍵盤輸入哦!'))
+                    line_bot_api.reply_message(event.reply_token,TextSendMessage(text = '請問你想要搜尋什麼呢?\n可以直接用下方鍵盤輸入哦!'))
                 elif mode == 'search':
                     unit = users.objects.get(uid=userid)
                     unit.state = 'normal'
