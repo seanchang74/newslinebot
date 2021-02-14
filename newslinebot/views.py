@@ -44,7 +44,7 @@ def callback(request):
                     else:
                         line_bot_api.reply_message(event.reply_token,TextSendMessage(text='你已經填寫過表單了，客服將馬上處理你的問題!'))
                 elif mtext == '@隨便看看':
-                    func.sendJustSee(event,userid)
+                    func.sendJustSee(event)
                 elif mtext == '@今日頭條':
                     func.sendTopic(event)
                 elif mtext == '@關鍵字搜索' and mode == 'normal':
@@ -56,9 +56,9 @@ def callback(request):
                     unit = users.objects.get(uid=userid)
                     unit.state = 'normal'
                     unit.save()
-                    func.sendSearch(event,mtext,userid)
+                    func.sendSearch(event,mtext)
                 elif mtext in category:
-                    func.sendHeadline(event,mtext,userid)
+                    func.sendHeadline(event,mtext)
                                    
         return HttpResponse()
     else:
